@@ -1,0 +1,146 @@
+.eco-actions-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 2rem;
+  font-family: 'Outfit', sans-serif;
+  color: #ffffff;
+}
+
+.actions-header {
+  margin-bottom: 1.5rem;
+}
+
+.actions-header h3 {
+  margin: 0;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.5rem;
+  color: #4ecdc4;
+}
+
+.actions-header p {
+  margin: 0.3rem 0 0 0;
+  color: #b0c4de;
+  font-size: 0.95rem;
+}
+
+.tier-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+.tier-tab-btn {
+  background: transparent;
+  border: none;
+  color: #888888;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: bold;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.tier-tab-btn:hover {
+  color: #ffffff;
+}
+
+.tier-tab-btn.active {
+  color: #4ecdc4;
+}
+
+.tier-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -0.6rem;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #4ecdc4;
+}
+
+.actions-panel {
+  transition: opacity 0.3s ease;
+}
+
+.actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.action-row-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 1.2rem;
+  border-radius: 12px;
+  transition: background 0.2s ease;
+}
+
+.action-row-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.action-body {
+  flex: 1;
+}
+
+.action-body h4 {
+  margin: 0 0 0.3rem 0;
+  font-size: 1.1rem;
+  color: #e0e0e0;
+}
+
+.action-body p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #b0c4de;
+  line-height: 1.4;
+}
+
+.action-impact-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(67, 233, 123, 0.1);
+  border: 1px solid rgba(67, 233, 123, 0.2);
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  min-width: 80px;
+}
+
+.impact-val {
+  font-family: 'Space Mono', monospace;
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #43e97b;
+}
+
+.impact-unit {
+  font-size: 0.7rem;
+  color: #b0c4de;
+}
+
+.commit-btn {
+  background: transparent;
+  border: 1px solid #4ecdc4;
+  color: #4ecdc4;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.commit-btn:hover {
+  background: #4ecdc4;
+  color: #0a0a0f;
+}

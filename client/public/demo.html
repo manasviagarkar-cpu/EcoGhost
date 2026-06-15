@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EcoGhost — Live Demo | Carbon Footprint Awareness Platform</title>
+  <meta name="description" content="EcoGhost live demo — experience how your carbon footprint affects your ghost avatar. Watch it degrade in real time. No backend required." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Design Tokens ─────────────────────────────────────── */
+    :root {
+      --bg-base: #07090f;
+      --bg-surface: #0d1117;
+      --bg-card: rgba(15, 20, 30, 0.88);
+      --bg-glass: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.08);
+      --text-primary: #f0f4f8;
+      --text-secondary: #8892a4;
+      --text-muted: #4a5568;
+      --cyan: #00f2fe;
+      --green: #43e97b;
+      --grey: #b0c4de;
+      --purple: #ce93d8;
+      --red: #ef9a9a;
+      --font: 'Outfit', system-ui, sans-serif;
+      --mono: 'Space Mono', monospace;
+      --r-md: 12px; --r-lg: 20px; --r-xl: 28px; --r-full: 9999px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      background-image:
+        radial-gradient(ellipse at 15% 15%, rgba(0,242,254,.06) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 85%, rgba(67,233,123,.04) 0%, transparent 55%);
+    }
+
+    /* ─── Header ─────────────────────────────────────────────── */
+    .demo-header {
+      background: rgba(7,9,15,.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo { font-family: var(--mono); font-size: 1.4rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--cyan), #4facfe);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .demo-badge {
+      background: rgba(0,242,254,.15); border: 1px solid rgba(0,242,254,.4);
+      color: var(--cyan); padding: .25rem .75rem; border-radius: var(--r-full);
+      font-size: .75rem; font-weight: 600; letter-spacing: .05em;
+    }
+    .header-desc { color: var(--text-muted); font-size: .85rem; margin-left: auto; }
+
+    /* ─── Main Layout ─────────────────────────────────────────── */
+    .demo-main {
+      max-width: 1280px; margin: 0 auto;
+      padding: 2rem 1.5rem;
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+    @media (max-width: 900px) { .demo-main { grid-template-columns: 1fr; } }
+
+    /* ─── Ghost Panel ─────────────────────────────────────────── */
+    .ghost-panel {
+      position: sticky; top: 80px;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+
+    /* ─── Ghost SVG Container ─────────────────────────────────── */
+    .ghost-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      padding: 2rem;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 1rem;
+      backdrop-filter: blur(12px);
+      transition: all .6s ease;
+      position: relative; overflow: hidden;
+    }
+
+    .ghost-container::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: var(--r-xl);
+      opacity: 0;
+      transition: opacity .6s ease;
+      pointer-events: none;
+    }
+
+    /* State glow backgrounds */
+    .ghost-container.radiant::before   { background: radial-gradient(circle at 50% 40%, rgba(0,242,254,.12), transparent 60%); opacity: 1; }
+    .ghost-container.stable::before    { background: radial-gradient(circle at 50% 40%, rgba(67,233,123,.10), transparent 60%); opacity: 1; }
+    .ghost-container.fading::before    { background: radial-gradient(circle at 50% 40%, rgba(176,196,222,.06), transparent 60%); opacity: 1; }
+    .ghost-container.suffering::before { background: radial-gradient(circle at 50% 40%, rgba(156,39,176,.10), transparent 60%); opacity: 1; }
+    .ghost-container.critical::before  { background: radial-gradient(circle at 50% 40%, rgba(244,67,54,.12), transparent 60%); opacity: 1; }
+
+    .ghost-wrapper {
+      width: 140px; height: 170px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .ghost-svg {
+      width: 100%; height: 100%;
+      transition: all .6s ease;
+    }
+
+    /* ── Radiant ── */
+    .radiant .ghost-svg .ghost-body { fill: url(#radiantGrad); filter: drop-shadow(0 0 16px rgba(0,242,254,.7)); }
+    .radiant .ghost-svg { animation: float-radiant 3.5s ease-in-out infinite; }
+
+    /* ── Stable ── */
+    .stable .ghost-svg .ghost-body { fill: url(#stableGrad); filter: drop-shadow(0 0 8px rgba(67,233,123,.5)); }
+    .stable .ghost-svg { animation: float-stable 3s ease-in-out infinite; }
+
+    /* ── Fading ── */
+    .fading .ghost-svg .ghost-body { fill: #b0c4de; opacity: .85; filter: grayscale(25%); }
+    .fading .ghost-svg { animation: float-fading 6s ease-in-out infinite; }
+
+    /* ── Suffering ── */
+    .suffering .ghost-svg .ghost-body { fill: #a9a9a9; opacity: .65; filter: invert(10%) sepia(60%); }
+    .suffering .ghost-svg { animation: shiver .12s ease-in-out infinite alternate; }
+
+    /* ── Critical ── */
+    .critical .ghost-svg .ghost-body { fill: #555; opacity: .45; filter: brightness(50%) contrast(150%); }
+    .critical .ghost-svg { animation: jitter .08s ease-in-out infinite; }
+
+    @keyframes float-radiant { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-16px) scale(1.03)} }
+    @keyframes float-stable  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    @keyframes float-fading  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+    @keyframes shiver { from{transform:skewX(-2.5deg) translateX(-1px)} to{transform:skewX(2.5deg) translateX(1px)} }
+    @keyframes jitter {
+      0%{transform:translate(-2px,-1px) rotate(-.5deg)}
+      25%{transform:translate(2px,1px) rotate(.5deg)}
+      50%{transform:translate(-1px,2px) rotate(-.3deg)}
+      75%{transform:translate(1px,-2px) rotate(.3deg)}
+      100%{transform:translate(-2px,0) rotate(0deg)}
+    }
+
+    /* ─── State Badge ─────────────────────────────────────────── */
+    .state-badge {
+      font-family: var(--mono); font-size: .75rem; font-weight: 700; letter-spacing: .1em;
+      padding: .35rem 1.25rem; border-radius: var(--r-full);
+      transition: all .6s ease;
+    }
+    .radiant-badge   { background: rgba(0,242,254,.15); color: var(--cyan); border: 1px solid rgba(0,242,254,.5); box-shadow: 0 0 20px rgba(0,242,254,.2); }
+    .stable-badge    { background: rgba(67,233,123,.15); color: var(--green); border: 1px solid rgba(67,233,123,.4); }
+    .fading-badge    { background: rgba(176,196,222,.12); color: var(--grey); border: 1px solid rgba(176,196,222,.3); }
+    .suffering-badge { background: rgba(156,39,176,.15); color: var(--purple); border: 1px solid rgba(156,39,176,.4); }
+    .critical-badge  { background: rgba(244,67,54,.15); color: var(--red); border: 1px solid rgba(244,67,54,.5); animation: crit-pulse 1s ease-in-out infinite; }
+
+    @keyframes crit-pulse { 0%,100%{box-shadow:0 0 10px rgba(244,67,54,.3)} 50%{box-shadow:0 0 28px rgba(244,67,54,.7)} }
+
+    /* ─── Health Bar ──────────────────────────────────────────── */
+    .health-bar-wrap { width: 100%; display: flex; flex-direction: column; gap: .4rem; }
+    .health-label { font-size: .8rem; color: var(--text-muted); display: flex; justify-content: space-between; }
+    .health-bar-track { height: 8px; background: rgba(255,255,255,.08); border-radius: var(--r-full); overflow: hidden; }
+    .health-bar-fill { height: 100%; border-radius: var(--r-full); transition: width .8s cubic-bezier(.4,0,.2,1), background .6s ease; }
+
+    /* ─── Ghost Voice ─────────────────────────────────────────── */
+    .voice-bubble {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 1.25rem;
+      backdrop-filter: blur(12px);
+      position: relative;
+    }
+    .voice-bubble::before {
+      content: ''; position: absolute; top: -8px; left: 32px;
+      width: 0; height: 0;
+      border-left: 8px solid transparent; border-right: 8px solid transparent;
+      border-bottom: 8px solid var(--border);
+    }
+    .voice-title { font-size: .8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .5rem; }
+    .voice-text { font-size: .9rem; color: var(--text-secondary); line-height: 1.6; font-style: italic; min-height: 3.5em; transition: opacity .3s ease; }
+    .voice-refresh-btn {
+      margin-top: .75rem; width: 100%;
+      background: var(--bg-glass); border: 1px solid var(--border);
+      color: var(--text-secondary); font-family: var(--font); font-size: .85rem;
+      padding: .5rem; border-radius: var(--r-md); cursor: pointer;
+      transition: all .2s ease;
+    }
+    .voice-refresh-btn:hover { background: rgba(0,242,254,.08); border-color: rgba(0,242,254,.3); color: var(--cyan); }
+
+    /* ─── Quick Log ───────────────────────────────────────────── */
+    .quicklog-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 1.25rem;
+      backdrop-filter: blur(12px);
+    }
+    .quicklog-title { font-size: .85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .75rem; }
+    .quicklog-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+    .qbtn {
+      display: flex; flex-direction: column; align-items: flex-start;
+      gap: .2rem; padding: .65rem .75rem;
+      background: var(--bg-glass); border: 1px solid var(--border);
+      border-radius: var(--r-md); cursor: pointer;
+      transition: all .2s ease; text-align: left;
+    }
+    .qbtn:hover { background: rgba(0,242,254,.08); border-color: rgba(0,242,254,.35); transform: translateY(-1px); }
+    .qbtn:active { transform: translateY(0) scale(.98); }
+    .qbtn-label { font-family: var(--font); font-size: .82rem; color: var(--text-primary); font-weight: 500; }
+    .qbtn-co2 { font-family: var(--mono); font-size: .7rem; color: #ff7043; }
+
+    /* ─── Right Panel ─────────────────────────────────────────── */
+    .right-panel { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* ─── Section Header ──────────────────────────────────────── */
+    .section-header { padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+    .section-title { font-size: 2rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .section-sub { font-size: .9rem; color: var(--text-muted); margin-top: .25rem; }
+
+    /* ─── KPI Grid ────────────────────────────────────────────── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
+    .kpi-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 1.25rem;
+      backdrop-filter: blur(12px); transition: all .3s ease; cursor: default;
+    }
+    .kpi-card:hover { border-color: rgba(0,242,254,.3); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,.5); }
+    .kpi-icon { font-size: 1.4rem; margin-bottom: .4rem; }
+    .kpi-label { font-size: .75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+    .kpi-value { font-family: var(--mono); font-size: 1.3rem; font-weight: 700; color: var(--cyan); margin: .2rem 0; transition: all .4s ease; }
+    .kpi-sub { font-size: .72rem; color: var(--text-muted); }
+
+    /* ─── State Carousel ──────────────────────────────────────── */
+    .states-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 1.5rem; backdrop-filter: blur(12px); }
+    .states-label { font-size: .8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 1rem; }
+    .states-grid { display: flex; gap: .75rem; flex-wrap: wrap; }
+    .state-pill {
+      display: flex; flex-direction: column; align-items: center; gap: .4rem;
+      padding: .75rem 1.25rem; border-radius: var(--r-lg); border: 1px solid var(--border);
+      cursor: pointer; transition: all .3s ease; min-width: 100px;
+      background: var(--bg-glass);
+    }
+    .state-pill:hover { transform: translateY(-3px); }
+    .state-pill.active { border-width: 2px; }
+    .state-pill-icon { font-size: 1.6rem; }
+    .state-pill-label { font-size: .75rem; font-weight: 600; }
+    .state-pill-range { font-family: var(--mono); font-size: .65rem; color: var(--text-muted); }
+
+    .state-pill.s-radiant   { border-color: rgba(0,242,254,.4);   background: rgba(0,242,254,.07); }
+    .state-pill.s-stable    { border-color: rgba(67,233,123,.4);  background: rgba(67,233,123,.07); }
+    .state-pill.s-fading    { border-color: rgba(176,196,222,.3); background: rgba(176,196,222,.05); }
+    .state-pill.s-suffering { border-color: rgba(156,39,176,.4);  background: rgba(156,39,176,.07); }
+    .state-pill.s-critical  { border-color: rgba(244,67,54,.5);   background: rgba(244,67,54,.07); animation: crit-pulse 1.2s ease-in-out infinite; }
+
+    .state-pill.s-radiant   .state-pill-label { color: var(--cyan); }
+    .state-pill.s-stable    .state-pill-label { color: var(--green); }
+    .state-pill.s-fading    .state-pill-label { color: var(--grey); }
+    .state-pill.s-suffering .state-pill-label { color: var(--purple); }
+    .state-pill.s-critical  .state-pill-label { color: var(--red); }
+
+    /* ─── Activity Log ────────────────────────────────────────── */
+    .activity-log { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 1.5rem; backdrop-filter: blur(12px); }
+    .act-list { list-style: none; display: flex; flex-direction: column; gap: .5rem; max-height: 240px; overflow-y: auto; }
+    .act-item {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .6rem 1rem; background: var(--bg-glass);
+      border: 1px solid var(--border); border-radius: var(--r-md);
+      font-size: .82rem; animation: slide-in .3s ease;
+    }
+    @keyframes slide-in { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+    .act-cat { font-family: var(--mono); font-size: .68rem; color: var(--cyan); background: rgba(0,242,254,.1); padding: 2px 8px; border-radius: var(--r-full); flex-shrink: 0; text-transform: uppercase; }
+    .act-note { flex: 1; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .act-co2 { font-family: var(--mono); font-size: .78rem; color: #ff7043; flex-shrink: 0; }
+    .act-empty { color: var(--text-muted); font-size: .85rem; text-align: center; padding: 1.5rem; }
+
+    /* ─── Toast ───────────────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem;
+      background: rgba(0,242,254,.15); border: 1px solid rgba(0,242,254,.4);
+      color: var(--cyan); padding: .75rem 1.5rem; border-radius: var(--r-md);
+      font-size: .875rem; backdrop-filter: blur(12px);
+      transform: translateY(100px); opacity: 0;
+      transition: all .4s cubic-bezier(.4,0,.2,1);
+      z-index: 9999; max-width: 320px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ─── Footer ──────────────────────────────────────────────── */
+    footer { background: var(--bg-surface); border-top: 1px solid var(--border); padding: 1.5rem 2rem; text-align: center; font-size: .8rem; color: var(--text-muted); }
+
+    /* ─── Scrollbar ───────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg-base); }
+    ::-webkit-scrollbar-thumb { background: rgba(0,242,254,.2); border-radius: 9999px; }
+
+    /* ─── Focus ───────────────────────────────────────────────── */
+    :focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="demo-header" role="banner">
+    <span class="logo">👻 EcoGhost</span>
+    <span class="demo-badge">⚡ LIVE DEMO</span>
+    <span class="header-desc">No backend required · Judges: click Drove 10km to see the ghost react!</span>
+  </header>
+
+  <!-- Main Layout -->
+  <main class="demo-main" id="main-content">
+
+    <!-- ── Ghost Panel ── -->
+    <aside class="ghost-panel" aria-label="Ghost avatar and controls">
+
+      <!-- Ghost Avatar -->
+      <div class="ghost-container radiant" id="ghostContainer" role="img" aria-label="EcoGhost avatar — currently Radiant Spirit">
+        <svg class="ghost-svg" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="radiantGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#00f2fe"/>
+              <stop offset="100%" stop-color="#4facfe"/>
+            </linearGradient>
+            <linearGradient id="stableGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#43e97b"/>
+              <stop offset="100%" stop-color="#38f9d7"/>
+            </linearGradient>
+            <filter id="glow-filter">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+          </defs>
+          <!-- Ghost Body -->
+          <path class="ghost-body" d="M 20,50 C 20,20 80,20 80,50 L 80,95 C 70,90 65,100 60,95 C 55,90 45,90 40,95 C 35,100 30,90 20,95 Z" />
+          <!-- Eyes (updated by JS) -->
+          <g id="ghostEyes" class="ghost-eyes"></g>
+          <!-- Mouth (updated by JS) -->
+          <g id="ghostMouth" class="ghost-mouth"></g>
+        </svg>
+
+        <!-- Health Bar -->
+        <div class="health-bar-wrap">
+          <div class="health-label">
+            <span>Ghost Health</span>
+            <span id="scoreLabel">80 / 100</span>
+          </div>
+          <div class="health-bar-track">
+            <div class="health-bar-fill" id="healthBarFill" style="width: 80%; background: linear-gradient(90deg, #00f2fe, #4facfe);"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- State Badge -->
+      <div class="state-badge radiant-badge" id="stateBadge" style="text-align:center;">RADIANT SPIRIT</div>
+
+      <!-- Ghost Voice -->
+      <div class="voice-bubble" aria-live="polite">
+        <div class="voice-title">👻 EcoGhost Whispers</div>
+        <p class="voice-text" id="voiceText">
+          "I'm glowing! Your ecological conscience is pure. Keep those emissions low and I'll shine forever."
+        </p>
+        <button class="voice-refresh-btn" id="voiceRefreshBtn" onclick="refreshVoice()" aria-label="Refresh ghost message">
+          ✨ Refresh Whisper
+        </button>
+      </div>
+
+      <!-- Quick Log -->
+      <div class="quicklog-card">
+        <div class="quicklog-title">⚡ One-Tap Quick Log</div>
+        <div class="quicklog-grid">
+          <button class="qbtn" onclick="quickLog('transport','gasoline_car',10,'Drove 10km',1.7)" id="btn-drove">
+            <span class="qbtn-label">🚗 Drove 10km</span>
+            <span class="qbtn-co2">+1.70 kg CO₂e</span>
+          </button>
+          <button class="qbtn" onclick="quickLog('transport','flight_short',500,'Flew Short-Haul',125)" id="btn-flew">
+            <span class="qbtn-label">✈️ Flew</span>
+            <span class="qbtn-co2">+125.00 kg CO₂e</span>
+          </button>
+          <button class="qbtn" onclick="quickLog('food','beef',0.25,'Ate Beef',6.75)" id="btn-beef">
+            <span class="qbtn-label">🥩 Ate Beef</span>
+            <span class="qbtn-co2">+6.75 kg CO₂e</span>
+          </button>
+          <button class="qbtn" onclick="quickLog('energy','electricity_india',8,'Used AC 8h',6.56)" id="btn-ac">
+            <span class="qbtn-label">❄️ Used AC 8h</span>
+            <span class="qbtn-co2">+6.56 kg CO₂e</span>
+          </button>
+          <button class="qbtn" onclick="quickLog('food','vegan_meal',1,'Ate Vegan Meal',0.5)" id="btn-vegan">
+            <span class="qbtn-label">🥗 Ate Vegan</span>
+            <span class="qbtn-co2">+0.50 kg CO₂e</span>
+          </button>
+          <button class="qbtn" onclick="quickLog('transport','train',50,'Took Train',1.75)" id="btn-train">
+            <span class="qbtn-label">🚆 Took Train</span>
+            <span class="qbtn-co2">+1.75 kg CO₂e</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── Right Panel ── -->
+    <section class="right-panel" aria-label="Carbon metrics and ghost states">
+
+      <div class="section-header">
+        <h1 class="section-title">EcoGhost Demo</h1>
+        <p class="section-sub">Watch your ghost degrade in real time as you log carbon activities. Click the Quick Log buttons!</p>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid" role="list" aria-label="Live metrics">
+        <div class="kpi-card" role="listitem">
+          <div class="kpi-icon">🌍</div>
+          <div class="kpi-label">Weekly CO₂</div>
+          <div class="kpi-value" id="kpiCo2">0.00 kg</div>
+          <div class="kpi-sub">Budget: 70 kg/week</div>
+        </div>
+        <div class="kpi-card" role="listitem">
+          <div class="kpi-icon">❤️‍🔥</div>
+          <div class="kpi-label">Ghost Health</div>
+          <div class="kpi-value" id="kpiHealth">80 / 100</div>
+          <div class="kpi-sub" id="kpiState">State: radiant</div>
+        </div>
+        <div class="kpi-card" role="listitem">
+          <div class="kpi-icon">🔥</div>
+          <div class="kpi-label">Activities</div>
+          <div class="kpi-value" id="kpiActivities">0</div>
+          <div class="kpi-sub">Logged this session</div>
+        </div>
+        <div class="kpi-card" role="listitem">
+          <div class="kpi-icon">📉</div>
+          <div class="kpi-label">vs Avg (12.8 kg/day)</div>
+          <div class="kpi-value" id="kpiDelta">+ 0.0 kg</div>
+          <div class="kpi-sub">Above average (0 days)</div>
+        </div>
+      </div>
+
+      <!-- All 5 States Showcase -->
+      <div class="states-section">
+        <div class="states-label">🎮 All 5 Ghost States — click to preview</div>
+        <div class="states-grid" role="list">
+          <button class="state-pill s-radiant active" onclick="previewState('radiant')" role="listitem" aria-label="Radiant state preview">
+            <span class="state-pill-icon">✨</span>
+            <span class="state-pill-label">Radiant</span>
+            <span class="state-pill-range">0–20 kg/wk</span>
+          </button>
+          <button class="state-pill s-stable" onclick="previewState('stable')" role="listitem" aria-label="Stable state preview">
+            <span class="state-pill-icon">🌿</span>
+            <span class="state-pill-label">Stable</span>
+            <span class="state-pill-range">21–50 kg/wk</span>
+          </button>
+          <button class="state-pill s-fading" onclick="previewState('fading')" role="listitem" aria-label="Fading state preview">
+            <span class="state-pill-icon">🌫️</span>
+            <span class="state-pill-label">Fading</span>
+            <span class="state-pill-range">51–100 kg/wk</span>
+          </button>
+          <button class="state-pill s-suffering" onclick="previewState('suffering')" role="listitem" aria-label="Suffering state preview">
+            <span class="state-pill-icon">💀</span>
+            <span class="state-pill-label">Suffering</span>
+            <span class="state-pill-range">101–200 kg/wk</span>
+          </button>
+          <button class="state-pill s-critical" onclick="previewState('critical')" role="listitem" aria-label="Critical state preview">
+            <span class="state-pill-icon">☠️</span>
+            <span class="state-pill-label">Critical</span>
+            <span class="state-pill-range">201+ kg/wk</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Activity Log -->
+      <div class="activity-log">
+        <div class="states-label" style="margin-bottom:.75rem">📝 Live Activity Feed</div>
+        <ul class="act-list" id="activityList" role="list" aria-label="Logged activities">
+          <li class="act-empty" id="actEmpty">No activities yet. Try clicking a Quick Log button! 👆</li>
+        </ul>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <footer role="contentinfo">
+    EcoGhost — PromptWars Challenge 3 Submission · Built with Gemini 2.5 Flash + GCP Cloud Run + Firebase<br/>
+    <small>Self-contained demo — no backend required</small>
+  </footer>
+
+<script>
+// ────────────────────────────────────────────────
+//  EcoGhost Demo Engine (vanilla JS)
+// ────────────────────────────────────────────────
+
+const EMISSION_FACTORS = {
+  transport: { gasoline_car:0.170, electric_vehicle:0.050, bus:0.089, train:0.035, flight_short:0.250, flight_long:0.150 },
+  food:      { beef:27.0, poultry:6.9, vegetarian_meal:0.8, vegan_meal:0.5, dairy:3.2 },
+  energy:    { electricity_india:0.820, electricity_us:0.370, natural_gas:0.185, solar_wind:0.012 },
+  shopping:  { fast_fashion:15.0, electronics:80.0, general_goods:3.0 }
+};
+
+const VOICE_MESSAGES = {
+  radiant: [
+    '"I\'m glowing! Your ecological conscience is pure. Keep those emissions low and I\'ll shine forever."',
+    '"Every green choice you make adds to my luminescence. I feel the energy of your good intentions!"',
+    '"Radiant! If you keep this up I may ascend to a higher plane of existence."'
+  ],
+  stable: [
+    '"Not bad, human. I\'m stable for now — but don\'t get comfortable with that gasoline habit."',
+    '"I\'m floating along comfortably. No complaints here, which is rare for a ghost."',
+    '"You\'re doing okay. Just okay. I need a little more effort to truly glow."'
+  ],
+  fading: [
+    '"I can feel myself going grey... your carbon choices are draining my energy."',
+    '"I feel a bit thin... like butter scraped over too much bread. Check your CO₂ dials."',
+    '"My edges are blurring. Those emissions are eating away at my ectoplasm, piece by piece."'
+  ],
+  suffering: [
+    '"I\'m shivering... each emission you add feels like a knife in my ectoplasm."',
+    '"Ouch. Every heavy emission choice is hitting me like a physical blow. I\'m shivering here."',
+    '"Do you smell that? That\'s the scent of my dignity evaporating with every gram of CO₂ you emit."'
+  ],
+  critical: [
+    '"The light... it\'s dimming. I\'m practically fading into nothingness. Save me!"',
+    '"I\'m almost gone. Do you even care? Seven more days at this rate and I cease to exist."',
+    '"My atoms are dispersing. This is what ecological indifference looks like from the inside."'
+  ]
+};
+
+const STATE_THRESHOLDS = [
+  { state:'radiant', max:20, badge:'RADIANT SPIRIT', badgeClass:'radiant-badge', color:'#00f2fe', barBg:'linear-gradient(90deg,#00f2fe,#4facfe)' },
+  { state:'stable', max:50, badge:'STABLE ENTITY', badgeClass:'stable-badge', color:'#43e97b', barBg:'linear-gradient(90deg,#43e97b,#38f9d7)' },
+  { state:'fading', max:100, badge:'FADING PRESENCE', badgeClass:'fading-badge', color:'#b0c4de', barBg:'linear-gradient(90deg,#b0c4de,#7eb8d4)' },
+  { state:'suffering', max:200, badge:'SUFFERING SPIRIT', badgeClass:'suffering-badge', color:'#ce93d8', barBg:'linear-gradient(90deg,#9c27b0,#ce93d8)' },
+  { state:'critical', max:Infinity, badge:'CRITICAL FORM', badgeClass:'critical-badge', color:'#ef9a9a', barBg:'linear-gradient(90deg,#c62828,#ef9a9a)' }
+];
+
+const EYES = {
+  radiant:   `<path d="M 33,45 Q 38,40 43,45" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M 57,45 Q 62,40 67,45" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>`,
+  stable:    `<circle cx="38" cy="45" r="4" fill="currentColor"/><circle cx="62" cy="45" r="4" fill="currentColor"/>`,
+  fading:    `<line x1="33" y1="45" x2="43" y2="45" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <line x1="57" y1="45" x2="67" y2="45" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>`,
+  suffering: `<line x1="33" y1="43" x2="43" y2="47" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <line x1="67" y1="43" x2="57" y2="47" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>`,
+  critical:  `<path d="M 33,40 L 43,50 M 43,40 L 33,50" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M 57,40 L 67,50 M 67,40 L 57,50" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>`
+};
+
+const MOUTHS = {
+  radiant:   `<path d="M 44,55 Q 50,62 56,55" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>`,
+  stable:    `<path d="M 46,56 Q 50,60 54,56" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>`,
+  fading:    `<line x1="46" y1="58" x2="54" y2="58" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>`,
+  suffering: `<path d="M 44,60 Q 50,53 56,60" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>`,
+  critical:  `<circle cx="50" cy="60" r="3" fill="none" stroke="currentColor" stroke-width="2.5"/>`
+};
+
+// ── App State ──────────────────────────────────────────────────────────
+let weeklyEmissions = 0;
+let ghostScore = 80;
+let currentState = 'radiant';
+let activityCount = 0;
+let activities = [];
+let isPreviewing = false;
+let previewTimeout = null;
+
+// ── DOM Refs ───────────────────────────────────────────────────────────
+const ghostContainer = document.getElementById('ghostContainer');
+const ghostEyes     = document.getElementById('ghostEyes');
+const ghostMouth    = document.getElementById('ghostMouth');
+const stateBadge    = document.getElementById('stateBadge');
+const healthFill    = document.getElementById('healthBarFill');
+const scoreLabel    = document.getElementById('scoreLabel');
+const voiceText     = document.getElementById('voiceText');
+const kpiCo2        = document.getElementById('kpiCo2');
+const kpiHealth     = document.getElementById('kpiHealth');
+const kpiState      = document.getElementById('kpiState');
+const kpiActivities = document.getElementById('kpiActivities');
+const kpiDelta      = document.getElementById('kpiDelta');
+const actList       = document.getElementById('activityList');
+const actEmpty      = document.getElementById('actEmpty');
+const toast         = document.getElementById('toast');
+
+// ── State Calculation ──────────────────────────────────────────────────
+function getState(emissions) {
+  for (const t of STATE_THRESHOLDS) {
+    if (emissions <= t.max) return t;
+  }
+  return STATE_THRESHOLDS[STATE_THRESHOLDS.length - 1];
+}
+
+// ── Update Ghost Visual ────────────────────────────────────────────────
+function updateGhost(stateKey) {
+  const st = STATE_THRESHOLDS.find(s => s.state === stateKey);
+  if (!st) return;
+
+  // Container class
+  ghostContainer.className = `ghost-container ${stateKey}`;
+  ghostContainer.setAttribute('aria-label', `EcoGhost avatar — currently ${st.badge}`);
+
+  // State badge
+  stateBadge.className = `state-badge ${st.badgeClass}`;
+  stateBadge.textContent = st.badge;
+
+  // SVG: update ghost body color via CSS variable
+  const ghostBody = ghostContainer.querySelector('.ghost-body');
+  if (ghostBody) {
+    const fills = { radiant:'url(#radiantGrad)', stable:'url(#stableGrad)', fading:'#b0c4de', suffering:'#a9a9a9', critical:'#555' };
+    ghostBody.setAttribute('fill', fills[stateKey] || '#888');
+    ghostBody.style.color = st.color;
+  }
+
+  // SVG eyes & mouth
+  ghostEyes.innerHTML = EYES[stateKey] || '';
+  ghostMouth.innerHTML = MOUTHS[stateKey] || '';
+
+  // Update SVG text color for eyes/mouth
+  ghostEyes.style.color = st.color;
+  ghostMouth.style.color = st.color;
+
+  // Health bar
+  const pct = Math.max(0, Math.min(100, ghostScore));
+  healthFill.style.width = pct + '%';
+  healthFill.style.background = st.barBg;
+  scoreLabel.textContent = `${pct} / 100`;
+
+  // State pills - mark active
+  document.querySelectorAll('.state-pill').forEach(p => p.classList.remove('active'));
+  const activePill = document.querySelector(`.s-${stateKey}`);
+  if (activePill) activePill.classList.add('active');
+}
+
+// ── Voice Message ──────────────────────────────────────────────────────
+function updateVoice(stateKey) {
+  const msgs = VOICE_MESSAGES[stateKey] || VOICE_MESSAGES.stable;
+  const msg = msgs[Math.floor(Math.random() * msgs.length)];
+  voiceText.style.opacity = '0';
+  setTimeout(() => {
+    voiceText.textContent = msg;
+    voiceText.style.opacity = '1';
+  }, 200);
+}
+
+// ── KPIs ───────────────────────────────────────────────────────────────
+function updateKPIs() {
+  kpiCo2.textContent = weeklyEmissions.toFixed(2) + ' kg';
+  kpiHealth.textContent = ghostScore + ' / 100';
+  kpiState.textContent = 'State: ' + currentState;
+  kpiActivities.textContent = activityCount;
+  const delta = weeklyEmissions - (12.8 * 7);
+  kpiDelta.textContent = (delta >= 0 ? '+' : '') + delta.toFixed(1) + ' kg';
+  kpiDelta.style.color = delta > 0 ? '#ef9a9a' : '#43e97b';
+}
+
+// ── Quick Log ──────────────────────────────────────────────────────────
+function quickLog(category, subCategory, value, label, co2) {
+  // Cancel preview mode
+  if (previewTimeout) { clearTimeout(previewTimeout); isPreviewing = false; }
+
+  weeklyEmissions += co2;
+  activityCount++;
+  ghostScore = Math.max(0, Math.min(100, 100 - Math.floor(weeklyEmissions / 2)));
+
+  const st = getState(weeklyEmissions);
+  currentState = st.state;
+
+  // Add to activity list
+  const act = { category, label, co2, time: new Date().toLocaleTimeString() };
+  activities.unshift(act);
+
+  // Update UI
+  updateGhost(currentState);
+  updateVoice(currentState);
+  updateKPIs();
+  renderActivities();
+  showToast(`+${co2.toFixed(2)} kg CO₂e logged: ${label}`);
+}
+
+// ── State Preview ──────────────────────────────────────────────────────
+function previewState(stateKey) {
+  isPreviewing = true;
+  const scoreMaps = { radiant:90, stable:72, fading:48, suffering:28, critical:8 };
+  ghostScore = scoreMaps[stateKey] || 50;
+
+  updateGhost(stateKey);
+  updateVoice(stateKey);
+  showToast(`👁️ Previewing: ${stateKey.toUpperCase()} state`);
+
+  // Revert after 3 seconds if no action
+  if (previewTimeout) clearTimeout(previewTimeout);
+  previewTimeout = setTimeout(() => {
+    isPreviewing = false;
+    ghostScore = Math.max(0, Math.min(100, 100 - Math.floor(weeklyEmissions / 2)));
+    updateGhost(currentState);
+    updateVoice(currentState);
+  }, 3000);
+}
+
+// ── Voice Refresh ──────────────────────────────────────────────────────
+function refreshVoice() {
+  updateVoice(currentState);
+}
+
+// ── Activity List Render ───────────────────────────────────────────────
+function renderActivities() {
+  if (activities.length === 0) return;
+  if (actEmpty) actEmpty.style.display = 'none';
+  
+  // Keep only last 8 items rendered
+  const toShow = activities.slice(0, 8);
+  actList.innerHTML = toShow.map(a => `
+    <li class="act-item" role="listitem">
+      <span class="act-cat">${a.category}</span>
+      <span class="act-note">${a.label} · ${a.time}</span>
+      <span class="act-co2">+${a.co2.toFixed(2)} kg</span>
+    </li>
+  `).join('');
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────
+let toastTimeout;
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// ── Init ───────────────────────────────────────────────────────────────
+updateGhost('radiant');
+updateVoice('radiant');
+updateKPIs();
+</script>
+</body>
+</html>

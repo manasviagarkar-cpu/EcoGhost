@@ -1,0 +1,129 @@
+.graveyard-section {
+  max-width: 1000px;
+  margin: 3rem auto;
+  padding: 2rem;
+  font-family: 'Outfit', sans-serif;
+  color: #ffffff;
+}
+
+.graveyard-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.graveyard-header h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2.2rem;
+  color: #8a6a6a;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.graveyard-subtitle {
+  color: #b0c4de;
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+}
+
+.empty-graveyard {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 3rem;
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  color: #b0c4de;
+}
+
+.graves-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.grave-card {
+  background: linear-gradient(135deg, #15151f 0%, #0c0c12 100%);
+  border: 1px solid rgba(138, 106, 106, 0.2);
+  border-radius: 16px 16px 0 0;
+  padding: 2rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+}
+
+.grave-card:hover {
+  border-color: #8a6a6a;
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(138, 106, 106, 0.15);
+}
+
+.grave-marker {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: bold;
+  font-size: 1rem;
+  color: #8a6a6a;
+  border: 1.5px solid #8a6a6a;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  letter-spacing: 2px;
+}
+
+.grave-name {
+  margin: 0 0 1.2rem;
+  font-size: 1.4rem;
+  font-family: 'Space Grotesk', sans-serif;
+  text-align: center;
+  color: #e0e0e0;
+}
+
+.grave-details {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 0.4rem;
+}
+
+.detail-label {
+  color: #888888;
+}
+
+.detail-val {
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.detail-val.cause {
+  color: #d4a5a5;
+  text-align: right;
+  max-width: 60%;
+  word-wrap: break-word;
+}
+
+.cert-download-link {
+  font-size: 0.85rem;
+  color: #7eb8d4;
+  text-decoration: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  text-align: center;
+  padding-top: 0.8rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.cert-download-link:hover {
+  color: #4ecdc4;
+}

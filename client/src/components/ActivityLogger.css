@@ -1,0 +1,137 @@
+.activity-logger-box {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.quick-logs-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.quick-logs-section h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #b0c4de;
+}
+
+.quick-buttons-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.quick-log-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quick-log-btn:hover {
+  background: #4facfe;
+  border-color: #4facfe;
+  transform: translateY(-1px);
+}
+
+.quick-log-btn:active {
+  transform: translateY(0);
+}
+
+.custom-log-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  color: #b0c4de;
+}
+
+.custom-log-form select,
+.custom-log-form input[type="text"],
+.custom-log-form input[type="number"] {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 0.6rem;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.custom-log-form select:focus,
+.custom-log-form input:focus {
+  outline: none;
+  border-color: #4facfe;
+  box-shadow: 0 0 5px rgba(79, 172, 254, 0.4);
+}
+
+.form-row-split {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+}
+
+.live-preview-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(79, 172, 254, 0.1);
+  border: 1px dashed rgba(79, 172, 254, 0.3);
+  padding: 0.8rem 1rem;
+  border-radius: 6px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.9rem;
+}
+
+.preview-label {
+  color: #4facfe;
+}
+
+.preview-value {
+  font-weight: bold;
+}
+
+.error-alert {
+  background: rgba(255, 75, 75, 0.15);
+  border: 1px solid rgba(255, 75, 75, 0.3);
+  color: #ff4b4b;
+  padding: 0.6rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.submit-log-btn {
+  background: #4facfe;
+  border: none;
+  color: #ffffff;
+  padding: 0.8rem;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-size: 1rem;
+}
+
+.submit-log-btn:hover:not(:disabled) {
+  background: #00f2fe;
+}
+
+.submit-log-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

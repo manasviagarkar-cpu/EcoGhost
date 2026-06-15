@@ -1,0 +1,98 @@
+.resurrection-arc-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 2rem;
+  font-family: 'Outfit', sans-serif;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.2rem;
+}
+
+.resurrection-arc-box h3 {
+  margin: 0;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.4rem;
+  color: #4facfe;
+}
+
+.arc-description {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #b0c4de;
+  line-height: 1.4;
+  max-width: 320px;
+}
+
+.streak-progress-ring-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-ring {
+  transform: rotate(-90deg);
+}
+
+.progress-ring-bar {
+  transition: stroke-dashoffset 0.35s;
+  transform-origin: 50% 50%;
+}
+
+.streak-days-display {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.days-number {
+  font-size: 2rem;
+  font-weight: bold;
+  font-family: 'Space Mono', monospace;
+}
+
+.days-label {
+  font-size: 0.75rem;
+  color: #b0c4de;
+  text-transform: uppercase;
+}
+
+.unlock-status-banner {
+  width: 100%;
+}
+
+.status-badge {
+  display: inline-block;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: bold;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+}
+
+.status-badge.unlocked {
+  background: rgba(67, 233, 123, 0.15);
+  color: #43e97b;
+  border: 1px solid #43e97b;
+}
+
+.status-badge.locked {
+  background: rgba(255, 255, 255, 0.08);
+  color: #888888;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.status-msg {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #e0e0e0;
+}
