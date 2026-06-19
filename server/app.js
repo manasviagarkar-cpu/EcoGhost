@@ -25,14 +25,20 @@ app.use(helmet({
   }
 }));
 
-// ── CORS ─────────────────────────────────────────────────────────────
+// ── CORS (API routes only) ───────────────────────────────────────────
+// Static files must NOT go through CORS middleware — Vite's crossorigin
+// attribute causes browsers to send an Origin header even for same-origin
+// asset requests.  Applying cors() globally caused every /assets/*.js
+// request from the Cloud Run URL to be rejected with a 500 error before
+// express.static could serve the file, producing the blank-white-page bug.
 const allowedOrigins = [
   'http://localhost:5173',
   'https://ecoghost.firebaseapp.com',
-  'https://ecoghost.web.app'
+  'https://ecoghost.web.app',
+  'https://ecoghost-146491922348.us-central1.run.app'
 ];
 
-app.use(cors({
+const corsMiddleware = cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -41,13 +47,14 @@ app.use(cors({
     }
   },
   credentials: true
-}));
+});
 
 // ── Body parsing ──────────────────────────────────────────────────────
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
-// ── Rate limiting ─────────────────────────────────────────────────────
+// ── Rate limiting + CORS + API routes ────────────────────────────────
+app.use('/api', corsMiddleware);
 app.use('/api', generalLimiter);
 
 // ── API routes ────────────────────────────────────────────────────────
