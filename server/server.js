@@ -1,5 +1,5 @@
-require('dotenv').config();
-const admin = require('firebase-admin');
+import 'dotenv/config';
+import admin from 'firebase-admin';
 
 // ── Firebase Admin initialization ──────────────────────────────────────
 if (!admin.apps.length) {
@@ -14,7 +14,7 @@ if (!admin.apps.length) {
   });
 }
 
-const app = require('./app');
+import app from './app.js';
 
 const PORT = process.env.PORT || 8080;
 
@@ -23,4 +23,4 @@ app.listen(PORT, () => {
   console.log(`[EcoGhost] Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
-module.exports = app;
+export default app;

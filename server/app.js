@@ -1,9 +1,13 @@
-const express = require('express');
-const helmet = require('helmet');
-const cors = require('cors');
-const path = require('path');
-const { generalLimiter } = require('./middleware/rateLimiter');
-const apiRouter = require('./routes');
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { generalLimiter } from './middleware/rateLimiter.js';
+import apiRouter from './routes.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -77,4 +81,4 @@ app.use((err, req, res, next) => {
   });
 });
 
-module.exports = app;
+export default app;

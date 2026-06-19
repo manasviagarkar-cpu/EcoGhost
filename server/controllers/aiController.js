@@ -1,5 +1,5 @@
-const { GoogleGenAI } = require('@google/generative-ai');
-const { geminiResponseSchema } = require('../schemas/zodSchemas');
+import { GoogleGenAI } from '@google/generative-ai';
+import { geminiResponseSchema } from '../schemas/zodSchemas.js';
 
 // Initialize local cache with a 5-minute TTL (300000ms)
 const aiCache = new Map();
@@ -18,7 +18,7 @@ const FALLBACK_MESSAGES = {
  * Standard AI Chat controller.
  * Injects user context and manages queries with caching and fallback.
  */
-exports.chatWithGhost = async (req, res, next) => {
+export const chatWithGhost = async (req, res, next) => {
   const userId = req.user.uid;
   const userMessage = req.body.message;
   

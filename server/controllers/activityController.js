@@ -1,5 +1,7 @@
-const admin = require('firebase-admin');
-const { activitySchema } = require('../schemas/zodSchemas');
+import admin from 'firebase-admin';
+import { activitySchema } from '../schemas/zodSchemas.js';
+import crypto from 'crypto';
+
 // Inline emission factors (mirrors client/src/utils/carbonCalculator.js)
 const EMISSION_FACTORS = {
   transport: { gasoline_car:0.170, electric_vehicle:0.050, bus:0.089, train:0.035, flight_short:0.250, flight_long:0.150 },
@@ -27,7 +29,7 @@ function getGhostStateFromDailyEmissions(daily) {
  * Controller to handle logging a carbon activity.
  * Recalculates user's streak and updates ghost state machine.
  */
-exports.logActivity = async (req, res, next) => {
+export const logActivity = async (req, res, next) => {
   try {
     // 1. Validate request body with Zod
     const validatedData = activitySchema.parse(req.body);
@@ -203,4 +205,3 @@ exports.logActivity = async (req, res, next) => {
     next(error);
   }
 };
-const crypto = require('crypto');

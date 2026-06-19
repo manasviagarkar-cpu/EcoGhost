@@ -1,11 +1,12 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
+import crypto from 'crypto';
 
-const { logActivity } = require('./controllers/activityController');
-const { chatWithGhost } = require('./controllers/aiController');
-const { requireAuth } = require('./middleware/auth');
-const { chatLimiter, generalLimiter } = require('./middleware/rateLimiter');
-const admin = require('firebase-admin');
+import { logActivity } from './controllers/activityController.js';
+import { chatWithGhost } from './controllers/aiController.js';
+import { requireAuth } from './middleware/auth.js';
+import { chatLimiter, generalLimiter } from './middleware/rateLimiter.js';
+import admin from 'firebase-admin';
 
 /**
  * 1. Log a carbon activity
@@ -92,7 +93,6 @@ router.post('/graveyard', requireAuth, async (req, res, next) => {
     }
 
     const graveyardRef = db.collection('graveyard').doc();
-    const crypto = require('crypto');
     const hashUid = crypto.createHash('sha256').update(uid).digest('hex');
 
     const graveEntry = {
@@ -164,4 +164,4 @@ router.get('/leaderboard', generalLimiter, async (req, res, next) => {
   }
 });
 
-module.exports = router;
+export default router;

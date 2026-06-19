@@ -1,10 +1,10 @@
-const rateLimit = require('express-rate-limit');
+import rateLimit from 'express-rate-limit';
 
 /**
  * General API Rate Limiter
  * Limits requests per IP to 100 within a 15-minute window.
  */
-exports.generalLimiter = rateLimit({
+export const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   standardHeaders: true,
@@ -19,7 +19,7 @@ exports.generalLimiter = rateLimit({
  * Limits requests to exactly 20 per minute.
  * The 21st request will trigger a 429 Too Many Requests response.
  */
-exports.chatLimiter = rateLimit({
+export const chatLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute window
   max: 20,              // 20 requests allowed
   standardHeaders: true,

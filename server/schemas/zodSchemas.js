@@ -1,4 +1,4 @@
-const { z } = require('zod');
+import { z } from 'zod';
 
 /**
  * XSS Sanitizer helper function.
@@ -17,7 +17,7 @@ function sanitizeInput(val) {
  * Schema for logging carbon activities.
  * Sanitizes all string fields before validation.
  */
-exports.activitySchema = z.object({
+export const activitySchema = z.object({
   category: z.enum(['transport', 'food', 'energy', 'shopping']),
   subCategory: z.string().preprocess(sanitizeInput, z.string().min(1).max(50)),
   value: z.number().positive('Emission activity value must be a positive number'),
@@ -29,7 +29,7 @@ exports.activitySchema = z.object({
  * Schema to validate Gemini AI responses before dispatch.
  * Confirms string structure and length constraints to prevent oversized response delivery.
  */
-exports.geminiResponseSchema = z.object({
+export const geminiResponseSchema = z.object({
   reply: z.string()
     .min(1, 'Reply cannot be empty')
     .max(280, 'Reply must be under 280 characters')

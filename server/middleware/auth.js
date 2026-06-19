@@ -1,10 +1,10 @@
-const admin = require('firebase-admin');
+import admin from 'firebase-admin';
 
 /**
  * Firebase Auth middleware.
  * Verifies the Bearer token in the Authorization header and injects req.user.
  */
-exports.requireAuth = async (req, res, next) => {
+export const requireAuth = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
