@@ -1,4 +1,4 @@
-const { describe, it, expect, vi } = require('vitest');
+import { describe, it, expect, vi } from 'vitest';
 
 // Mock admin sdk
 vi.mock('firebase-admin', () => {

@@ -1,5 +1,5 @@
-const { describe, it, expect } = require('vitest');
-const { z } = require('zod');
+import { describe, it, expect } from 'vitest';
+import { z } from 'zod';
 
 // Schema duplicates for test context isolation
 const activitySchema = z.object({

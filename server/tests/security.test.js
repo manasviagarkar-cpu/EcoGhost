@@ -1,4 +1,4 @@
-const { describe, it, expect } = require('vitest');
+import { describe, it, expect } from 'vitest';
 
 describe('Security Stack and Headers Verification Tests', () => {
   it('should verify Helmet middleware is loaded and configures Content-Security-Policy header', () => {
