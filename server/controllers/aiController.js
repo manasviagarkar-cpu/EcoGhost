@@ -83,7 +83,7 @@ export const chatWithGhost = async (req, res, next) => {
     try {
       const validated = geminiResponseSchema.parse({ reply: replyText });
       replyText = validated.reply;
-    } catch (zodError) {
+    } catch {
       // If response is longer than 280 characters, truncate gracefully
       if (replyText.length > 280) {
         replyText = replyText.slice(0, 277) + '...';
@@ -97,7 +97,7 @@ export const chatWithGhost = async (req, res, next) => {
     });
 
     return res.status(200).json({ reply: replyText });
-  } catch (error) {
+  } catch {
     // Audit check: Error logging via pino-compatible or standard logging structure
     // Log the error using standard express error handling (delegating to errorHandler)
     return handleFallback();

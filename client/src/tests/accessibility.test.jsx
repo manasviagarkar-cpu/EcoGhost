@@ -1,13 +1,11 @@
-import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import GhostAvatar from '../components/GhostAvatar';
-import Dashboard from '../components/Dashboard';
 
 describe('Accessibility Compliance and WCAG Landmark Tests', () => {
   it('should render skip link in dashboard root', () => {
     // Check presence of skip-to-content anchor in layout mock
-    const container = render(
+    render(
       <div>
         <a href="#main-content" className="skip-link">Skip to Content</a>
         <main id="main-content">Content</main>
@@ -31,7 +29,7 @@ describe('Accessibility Compliance and WCAG Landmark Tests', () => {
   });
 
   it('should configure aria-live politeness inside status nodes', () => {
-    const container = render(<div aria-live="polite" role="status">Emissions: 12.8 kg</div>);
+    render(<div aria-live="polite" role="status">Emissions: 12.8 kg</div>);
     const statusBox = screen.getByRole('status');
     expect(statusBox.getAttribute('aria-live')).toBe('polite');
   });

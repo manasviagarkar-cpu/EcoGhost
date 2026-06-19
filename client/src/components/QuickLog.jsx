@@ -1,4 +1,3 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import { calculateEmissions } from '../utils/carbonCalculator';
 import './QuickLog.css';
@@ -23,7 +22,7 @@ export default function QuickLog({ onQuickLog }) {
         unit: btn.unit,
         note: `Quick Logged: ${btn.label} (+${co2.toFixed(2)} kg CO2e)`
       });
-    } catch (err) {
+    } catch {
       // Graceful error isolation
     }
   };

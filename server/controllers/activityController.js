@@ -2,27 +2,124 @@ import admin from 'firebase-admin';
 import { activitySchema } from '../schemas/zodSchemas.js';
 import crypto from 'crypto';
 
-// Inline emission factors (mirrors client/src/utils/carbonCalculator.js)
-const EMISSION_FACTORS = {
-  transport: { gasoline_car:0.170, electric_vehicle:0.050, bus:0.089, train:0.035, flight_short:0.250, flight_long:0.150 },
-  food: { beef:27.0, poultry:6.9, vegetarian_meal:0.8, vegan_meal:0.5, dairy:3.2 },
-  energy: { electricity_india:0.820, electricity_us:0.370, natural_gas:0.185, solar_wind:0.012 },
-  shopping: { fast_fashion:15.0, electronics:80.0, general_goods:3.0 }
-};
-function calculateEmissions(category, subCategory, value) {
-  if (value < 0) throw new TypeError('Value must be a positive number');
-  const factors = EMISSION_FACTORS[category];
-  if (!factors) throw new Error(`Unknown category: ${category}`);
-  const factor = factors[subCategory];
-  if (factor === undefined) throw new Error(`Unknown subcategory: ${subCategory}`);
-  return Number((value * factor).toFixed(3));
+import {
+  calculateEmissions,
+  getGhostStateFromDailyEmissions
+} from '../../shared/calculators/emission.js';
+
+/**
+ * Calculates new score, streak, and resurrection status based on daily carbon budget.
+ * 
+ * @param {object} userData 
+ * @param {object} ghostData 
+ * @param {number} dailyTotalCo2 
+ * @param {string} todayStr 
+ * @returns {object} updated metrics
+ */
+function processScoreAndStreak(userData, ghostData, dailyTotalCo2, todayStr) {
+  const BUDGET = 10.0;
+  let newScore = ghostData.score;
+  let newStreak = userData.currentStreak;
+  let newResurrectionStatus = userData.resurrectionStatus;
+  let newResurrectionStartDate = userData.resurrectionStartDate;
+
+  if (dailyTotalCo2 <= BUDGET) {
+    // Daily emission is under budget: increment score by +5
+    newScore = Math.min(100, newScore + 5);
+    
+    // Update streak if this is a new active day
+    if (userData.lastActiveDate !== todayStr) {
+      newStreak += 1;
+    }
+  } else {
+    // Daily emission exceeds budget: apply penalty of -2 per kg over budget (max -20)
+    const excess = dailyTotalCo2 - BUDGET;
+    const penalty = Math.min(20, excess * 2);
+    newScore = Math.max(0, newScore - penalty);
+
+    // STREAK BROKEN: Reset streaks immediately
+    newStreak = 0;
+
+    // Resurrection Progress resets if streak is broken
+    if (newResurrectionStatus === 'active') {
+      newResurrectionStatus = 'none';
+      newResurrectionStartDate = null;
+    }
+  }
+
+  return { newScore, newStreak, newResurrectionStatus, newResurrectionStartDate };
 }
-function getGhostStateFromDailyEmissions(daily) {
-  if (daily <= 20) return 'radiant';
-  if (daily <= 40) return 'stable';
-  if (daily <= 60) return 'fading';
-  if (daily <= 80) return 'suffering';
-  return 'critical';
+
+/**
+ * Processes critical days tracking and death sequence if applicable.
+ * 
+ * @param {string} newState 
+ * @param {object} ghostData 
+ * @param {object} userData 
+ * @param {string} uid 
+ * @param {number} newScore 
+ * @param {string} category 
+ * @param {string} subCategory 
+ * @param {number} dailyTotalCo2 
+ * @param {object} db 
+ * @param {object} transaction 
+ * @returns {object} critical days and death details
+ */
+function checkGhostDeath(
+  newState,
+  ghostData,
+  userData,
+  uid,
+  newScore,
+  category,
+  subCategory,
+  dailyTotalCo2,
+  db,
+  transaction
+) {
+  let consecutiveCriticalDays = ghostData.consecutiveCriticalDays || 0;
+  let criticalStartDate = ghostData.criticalStartDate;
+  let isDead = false;
+  let deathTimestamp = null;
+  let graveyardEntry = null;
+
+  if (newState === 'critical') {
+    if (consecutiveCriticalDays === 0) {
+      criticalStartDate = admin.firestore.Timestamp.now();
+    }
+    consecutiveCriticalDays += 1;
+
+    // GHOST DEATH: Trigger death sequence on exactly the 7th critical day
+    if (consecutiveCriticalDays >= 7) {
+      isDead = true;
+      deathTimestamp = admin.firestore.Timestamp.now();
+      consecutiveCriticalDays = 0; // Reset counter for next run
+
+      // Generate Graveyard entry document
+      const graveyardRef = db.collection('graveyard').doc();
+      const hashUid = crypto.createHash('sha256').update(uid).digest('hex');
+      
+      graveyardEntry = {
+        graveyardId: graveyardRef.id,
+        originalUid: hashUid,
+        ghostName: ghostData.name,
+        finalScore: newScore,
+        causeOfDeath: `${category} emissions (${subCategory})`,
+        lifespanDays: Math.floor((Date.now() - userData.createdAt.toDate()) / (1000 * 60 * 60 * 24)) || 1,
+        deathDate: deathTimestamp,
+        totalCo2Emissions: dailyTotalCo2,
+        certificateUrl: `https://storage.googleapis.com/${process.env.GCS_BUCKET_NAME}/certificates/${graveyardRef.id}.png`
+      };
+
+      transaction.set(graveyardRef, graveyardEntry);
+    }
+  } else {
+    // Reset critical days count when state shifts out of critical
+    consecutiveCriticalDays = 0;
+    criticalStartDate = null;
+  }
+
+  return { consecutiveCriticalDays, criticalStartDate, isDead, deathTimestamp, graveyardEntry };
 }
 
 /**
@@ -72,82 +169,36 @@ export const logActivity = async (req, res, next) => {
         dailyTotalCo2 += doc.data().co2Emissions;
       });
 
-      // 4. Score adjustment logic (Daily budget = 10kg)
-      const BUDGET = 10.0;
-      let newScore = ghostData.score;
-      let newStreak = userData.currentStreak;
-      let newResurrectionStatus = userData.resurrectionStatus;
-      let newResurrectionStartDate = userData.resurrectionStartDate;
-
-      if (dailyTotalCo2 <= BUDGET) {
-        // Daily emission is under budget: increment score by +5
-        newScore = Math.min(100, newScore + 5);
-        
-        // Update streak if this is a new active day
-        if (userData.lastActiveDate !== todayStr) {
-          newStreak += 1;
-        }
-      } else {
-        // Daily emission exceeds budget: apply penalty of -2 per kg over budget (max -20)
-        const excess = dailyTotalCo2 - BUDGET;
-        const penalty = Math.min(20, excess * 2);
-        newScore = Math.max(0, newScore - penalty);
-
-        // STREAK BROKEN: Reset streaks immediately
-        newStreak = 0;
-
-        // Resurrection Progress resets if streak is broken
-        if (newResurrectionStatus === 'active') {
-          newResurrectionStatus = 'none';
-          newResurrectionStartDate = null;
-        }
-      }
+      // 4. Score adjustment and streak updates (delegated to pure helper)
+      const {
+        newScore,
+        newStreak,
+        newResurrectionStatus,
+        newResurrectionStartDate
+      } = processScoreAndStreak(userData, ghostData, dailyTotalCo2, todayStr);
 
       // 5. State Machine classification
       const newState = getGhostStateFromDailyEmissions(dailyTotalCo2);
 
-      // 6. Critical day tracking
-      let consecutiveCriticalDays = ghostData.consecutiveCriticalDays || 0;
-      let criticalStartDate = ghostData.criticalStartDate;
-      let isDead = false;
-      let deathTimestamp = null;
-      let graveyardEntry = null;
-
-      if (newState === 'critical') {
-        if (consecutiveCriticalDays === 0) {
-          criticalStartDate = admin.firestore.Timestamp.now();
-        }
-        consecutiveCriticalDays += 1;
-
-        // GHOST DEATH: Trigger death sequence on exactly the 7th critical day
-        if (consecutiveCriticalDays >= 7) {
-          isDead = true;
-          deathTimestamp = admin.firestore.Timestamp.now();
-          consecutiveCriticalDays = 0; // Reset counter for next run
-
-          // Generate Graveyard entry document
-          const graveyardRef = db.collection('graveyard').doc();
-          const hashUid = crypto.createHash('sha256').update(uid).digest('hex');
-          
-          graveyardEntry = {
-            graveyardId: graveyardRef.id,
-            originalUid: hashUid,
-            ghostName: ghostData.name,
-            finalScore: newScore,
-            causeOfDeath: `${category} emissions (${subCategory})`,
-            lifespanDays: Math.floor((Date.now() - userData.createdAt.toDate()) / (1000 * 60 * 60 * 24)) || 1,
-            deathDate: deathTimestamp,
-            totalCo2Emissions: dailyTotalCo2,
-            certificateUrl: `https://storage.googleapis.com/${process.env.GCS_BUCKET_NAME}/certificates/${graveyardRef.id}.png`
-          };
-
-          transaction.set(graveyardRef, graveyardEntry);
-        }
-      } else {
-        // Reset critical days count when state shifts out of critical
-        consecutiveCriticalDays = 0;
-        criticalStartDate = null;
-      }
+      // 6. Critical day and death sequence tracking (delegated to pure helper)
+      const {
+        consecutiveCriticalDays,
+        criticalStartDate,
+        isDead,
+        deathTimestamp,
+        graveyardEntry
+      } = checkGhostDeath(
+        newState,
+        ghostData,
+        userData,
+        uid,
+        newScore,
+        category,
+        subCategory,
+        dailyTotalCo2,
+        db,
+        transaction
+      );
 
       // 7. Write new states back inside transaction
       const newActivityRef = db.collection('activities').doc();

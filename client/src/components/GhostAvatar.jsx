@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import './GhostAvatar.css';
 
@@ -13,7 +13,7 @@ const SYNTH_PROFILES = {
   critical: { type: 'square', freq: 110, detune: 50, q: 10, gain: 0.04, duration: 0.5 }
 };
 
-export default function GhostAvatar({ state, score, name }) {
+export default function GhostAvatar({ state, score, name = 'EcoGhost' }) {
   const [isVisible, setIsVisible] = useState(true);
   const audioContextRef = useRef(null);
 
@@ -69,7 +69,7 @@ export default function GhostAvatar({ state, score, name }) {
 
       osc.start();
       osc.stop(ctx.currentTime + profile.duration);
-    } catch (err) {
+    } catch {
       // Graceful error handling for audio blockades by browsers
       // (Do not console.log in production)
     }
@@ -190,8 +190,4 @@ GhostAvatar.propTypes = {
   state: PropTypes.oneOf(['radiant', 'stable', 'fading', 'suffering', 'critical']).isRequired,
   score: PropTypes.number.isRequired,
   name: PropTypes.string
-};
-
-GhostAvatar.defaultProps = {
-  name: 'EcoGhost'
 };

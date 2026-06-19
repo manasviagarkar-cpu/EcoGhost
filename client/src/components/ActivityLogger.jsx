@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { calculateEmissions } from '../utils/carbonCalculator';
 import './ActivityLogger.css';
@@ -66,7 +66,7 @@ export default function ActivityLogger({ onLog }) {
         note: `Quick logged: ${option.label}`
       });
       setErrorMsg('');
-    } catch (err) {
+    } catch {
       setErrorMsg('Failed to process quick log. Try again.');
     } finally {
       setLoading(false);
@@ -92,7 +92,7 @@ export default function ActivityLogger({ onLog }) {
       setNote('');
       setValue(1);
       setErrorMsg('');
-    } catch (err) {
+    } catch {
       setErrorMsg('Failed to record activity log.');
     } finally {
       setLoading(false);

@@ -2,18 +2,20 @@
 
 # Stage 1: Build the React client via Vite
 FROM node:20-alpine AS builder
-WORKDIR /app/client
-COPY client/package*.json ./
-RUN npm ci
-COPY client/ ./
-RUN npm run build
+WORKDIR /app
+COPY client/package*.json ./client/
+RUN npm ci --prefix client
+COPY shared/ ./shared/
+COPY client/ ./client/
+RUN npm run build --prefix client
 
 # Stage 2: Set up the production Express runtime
 FROM node:20-alpine
 WORKDIR /app
 COPY server/package*.json ./server/
 RUN npm ci --prefix server --only=production
-COPY server/ ./server
+COPY shared/ ./shared/
+COPY server/ ./server/
 COPY --from=builder /app/client/dist ./server/public
 
 ENV PORT=8080

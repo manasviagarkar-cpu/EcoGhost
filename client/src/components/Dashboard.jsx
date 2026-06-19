@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import GhostAvatar from './GhostAvatar';
 import ActivityLogger from './ActivityLogger';
@@ -64,7 +64,7 @@ export default function Dashboard({ initialGhostState, activitiesData, onAddActi
           isDead: response.isDead
         }));
       }
-    } catch (err) {
+    } catch {
       // Standard application error handling (Pino-compatible on server, quiet on client)
     }
   }, [onAddActivity]);

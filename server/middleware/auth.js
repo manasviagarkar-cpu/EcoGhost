@@ -17,7 +17,7 @@ export const requireAuth = async (req, res, next) => {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     req.user = decodedToken;
     next();
-  } catch (error) {
+  } catch {
     return res.status(401).json({ error: 'Unauthorized — invalid or expired token' });
   }
 };

@@ -1,8 +1,7 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import './ResurrectionArc.css';
 
-export default function ResurrectionArc({ streakDays }) {
+export default function ResurrectionArc({ streakDays = 0 }) {
   const TARGET_DAYS = 30;
   const progressPercent = Math.min(100, Math.floor((streakDays / TARGET_DAYS) * 100));
   const unlocked = streakDays >= TARGET_DAYS;
@@ -68,8 +67,4 @@ export default function ResurrectionArc({ streakDays }) {
 
 ResurrectionArc.propTypes = {
   streakDays: PropTypes.number.isRequired
-};
-
-ResurrectionArc.defaultProps = {
-  streakDays: 0
 };

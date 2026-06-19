@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import GhostAvatar from './components/GhostAvatar';
 import GhostVoice from './components/GhostVoice';
 import QuickLog from './components/QuickLog';
