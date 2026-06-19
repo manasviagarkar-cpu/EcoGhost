@@ -19,10 +19,10 @@ function sanitizeInput(val) {
  */
 export const activitySchema = z.object({
   category: z.enum(['transport', 'food', 'energy', 'shopping']),
-  subCategory: z.string().preprocess(sanitizeInput, z.string().min(1).max(50)),
+  subCategory: z.preprocess(sanitizeInput, z.string().min(1).max(50)),
   value: z.number().positive('Emission activity value must be a positive number'),
-  unit: z.string().preprocess(sanitizeInput, z.string().min(1).max(10)),
-  note: z.string().preprocess(sanitizeInput, z.string().max(280)).optional()
+  unit: z.preprocess(sanitizeInput, z.string().min(1).max(10)),
+  note: z.preprocess(sanitizeInput, z.string().max(280)).optional()
 });
 
 /**

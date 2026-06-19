@@ -1,4 +1,4 @@
-import { GoogleGenAI } from '@google/generative-ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { geminiResponseSchema } from '../schemas/zodSchemas.js';
 
 // Initialize local cache with a 5-minute TTL (300000ms)
@@ -48,7 +48,7 @@ export const chatWithGhost = async (req, res, next) => {
       return handleFallback();
     }
 
-    const ai = new GoogleGenAI({ apiKey });
+    const ai = new GoogleGenerativeAI(apiKey);
     const model = ai.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     // SYSTEM PROMPT: Never uses the phrase "carbon footprint"
