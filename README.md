@@ -1,4 +1,4 @@
-# EcoGhost — Carbon Footprint Awareness Platform
+# EcoGhost — Carbon Footprint Awareness Platform 
 
 EcoGhost binds the user's daily ecological decisions to the mortality of a sentient, darkly humorous spiritual avatar, transforming abstract emission numbers into a visceral, emotional struggle for survival. 
 
